@@ -14,25 +14,35 @@
 </style>
 
 <body>
+<!-- Load the `mapbox-gl-geocoder` plugin. -->
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.1.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.1.0/mapbox-gl-geocoder.css" type="text/css">
 <div id="map"></div>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoidW5jaGFpbmVkMjA3NyIsImEiOiJjbWczcHYzdHQxNmdvMmtzNmg2ZnhzNWU5In0.RrORyUnf3K0-xFKXsLaorw';
     const map = new mapboxgl.Map({
         container: 'map', // container ID
         center: [107.856167, 3.040798], // starting position [lng, lat]. Note that lat must be set between -90 and 90
-        zoom: 5 // starting zoom        
+        zoom: 5, // starting zoom
+        style: 'mapbox://styles/unchained2077/cmglrmreh00ro01seg48zgbjb' // style URL 
     });
-    map.animate = true;
 
     map.on('load', () => {
         map.addControl(new mapboxgl.FullscreenControl());
         map.addControl(new mapboxgl.NavigationControl({
             visualizePitch: true
-        }), 'top-left');
+        }), 'bottom-right');
         map.addControl(new mapboxgl.ScaleControl({
             maxWidth: 100,
             unit: 'metric'
         }));
+        map.addControl(
+        new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            useBrowserFocus: true,
+            mapboxgl: mapboxgl
+        }), 'top-left'
+        );
         map.addControl(new mapboxgl.GeolocateControl({
             positionOptions: {
                 enableHighAccuracy: true
@@ -40,7 +50,8 @@
             showAccuracyCircle: false,
             trackUserLocation: true,
             showUserHeading: true
-        }));
+        }), 'top-left');
+        /*
         const popup = new mapboxgl.Popup({ offset: 25 }).setText(
         'Ini adalah Marker Laut China Selatan'
         );
@@ -50,6 +61,51 @@
             .setLngLat([107.856167, 3.040798])
             .setPopup(popup)
             .addTo(map);
+        */
+       
+        map.on('click', 'twentyfive7utf8-2fckmq', function(e) {
+            // Query for features at the clicked location
+            var features = map.queryRenderedFeatures(e.point, {
+                layers: ['twentyfive7utf8-2fckmq'] // Pastikan nama layer betul
+            });
+
+        if (features.length > 0) {
+            var feature = features[0]; // Dapatkan feature pertama yang diklik
+            var properties = feature.properties;
+            var popupHTML = '<h3>Tree Details:</h3><ul>';
+    
+        // Loop untuk ambil semua atribut dan nilai dalam feature.properties
+        for (var key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                popupHTML += '<li><strong>' + key + ':</strong> ' + properties[key] + '</li>';
+                }
+        }
+    
+        popupHTML += '</ul>';
+
+        // Paparkan popup dengan semua atribut
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(popupHTML)
+            .addTo(map);
+}
+        });
+
+        // Hover interaction to change cursor
+        map.on('mouseenter', 'twentyfive7utf8-2fckmq', function() {
+            map.getCanvas().style.cursor = 'pointer'; 
+        });
+
+        map.on('mouseleave', 'twentyfive7utf8-2fckmq', function() {
+            map.getCanvas().style.cursor = ''; 
+        });
+        
+        map.setSnow({
+            density: 1,
+            intensity: 0.3
+        });
+
+        
     });
 </script>
 </body>
